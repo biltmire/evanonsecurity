@@ -1,0 +1,631 @@
+<!DOCTYPE html><html lang="en" data-theme="light" push::2.25.8::listener::pm="1"><head>
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evan Baltman</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=JetBrains+Mono:wght@300;400;500&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         oklch(96.8% 0.011 78);
+      --bg-alt:     oklch(93.5% 0.013 76);
+      --surface:    oklch(99.2% 0.006 78);
+      --border:     oklch(87%   0.013 75);
+      --border-2:   oklch(80%   0.014 74);
+      --text:       oklch(18%   0.016 64);
+      --text-2:     oklch(46%   0.013 64);
+      --text-3:     oklch(64%   0.010 68);
+      --accent:     oklch(36%   0.022 64);
+      --tag-bg:     oklch(90%   0.015 75);
+      --tag-text:   oklch(34%   0.020 64);
+      --cube-top:   oklch(88%   0.018 76);
+      --cube-left:  oklch(74%   0.018 74);
+      --cube-right: oklch(60%   0.018 72);
+      --shadow:     oklch(0% 0 0 / 0.06);
+      --ff-serif:   'Playfair Display', Georgia, serif;
+      --ff-sans:    'Inter', system-ui, sans-serif;
+      --ff-mono:    'JetBrains Mono', 'Fira Code', monospace;
+    }
+    [data-theme="dark"] {
+      --bg:         oklch(12.5% 0.010 268);
+      --bg-alt:     oklch(17%   0.012 265);
+      --surface:    oklch(15.5% 0.010 266);
+      --border:     oklch(26%   0.013 265);
+      --border-2:   oklch(33%   0.014 265);
+      --text:       oklch(91%   0.010 76);
+      --text-2:     oklch(65%   0.012 75);
+      --text-3:     oklch(48%   0.010 74);
+      --accent:     oklch(82%   0.022 76);
+      --tag-bg:     oklch(22%   0.015 265);
+      --tag-text:   oklch(74%   0.020 76);
+      --cube-top:   oklch(32%   0.014 265);
+      --cube-left:  oklch(22%   0.014 266);
+      --cube-right: oklch(17%   0.013 267);
+      --shadow:     oklch(0% 0 0 / 0.40);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--ff-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+      transition: background 0.35s ease, color 0.35s ease;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 52px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.35s;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo-text {
+      font-family: var(--ff-serif);
+      font-size: 16px; font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .nav-right { display: flex; align-items: center; gap: 36px; }
+    .nav-link {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-2); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--text); }
+    .theme-toggle {
+      background: none; border: 1px solid var(--border);
+      border-radius: 100px; padding: 5px 13px;
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      font-family: var(--ff-mono); font-size: 10.5px;
+      color: var(--text-2); transition: all 0.2s;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--border-2); }
+    .toggle-sun, .toggle-moon { width: 13px; height: 13px; }
+    [data-theme="dark"] .toggle-sun { display: none; }
+    [data-theme="light"] .toggle-moon { display: none; }
+
+    /* ── HERO ────────────────────────────────── */
+    .hero {
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-inner {
+      max-width: 1140px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 360px;
+      gap: 0; align-items: center;
+      min-height: 420px;
+    }
+    .hero-content { padding: 72px 60px 72px 52px; }
+    .hero-eyebrow {
+      font-family: var(--ff-mono); font-size: 10.5px;
+      font-weight: 400; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-3);
+      margin-bottom: 22px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--text-3);
+      flex-shrink: 0;
+    }
+    .hero-name {
+      font-family: var(--ff-serif);
+      font-size: clamp(46px, 5.5vw, 72px);
+      font-weight: 700; line-height: 1.04;
+      letter-spacing: -0.025em; color: var(--text);
+      margin-bottom: 8px;
+    }
+    .hero-name em { font-style: italic; font-weight: 400; }
+    .hero-rule {
+      width: 48px; height: 2px;
+      background: var(--border-2);
+      margin: 22px 0;
+    }
+    .hero-bio {
+      font-size: 15.5px; line-height: 1.8;
+      color: var(--text-2); max-width: 520px;
+      font-weight: 300; text-wrap: pretty;
+      margin-bottom: 28px;
+    }
+    .hero-bio strong { color: var(--text); font-weight: 500; }
+    .hero-bio em { font-style: italic; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag {
+      font-family: var(--ff-mono); font-size: 10px;
+      padding: 5px 10px; background: var(--tag-bg);
+      color: var(--tag-text); border-radius: 2px;
+      letter-spacing: 0.04em;
+    }
+
+    .hero-visual {
+      height: 100%; min-height: 420px;
+      border-left: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-alt);
+      overflow: hidden; position: relative;
+    }
+    .hero-photo {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center top;
+      display: block;
+    }
+
+    /* ── ARTICLES ────────────────────────────── */
+    .articles-wrap {
+      max-width: 1140px; margin: 0 auto;
+      padding: 60px 52px 80px;
+    }
+    .section-header {
+      display: flex; align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      font-family: var(--ff-serif);
+      font-size: 20px; font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .section-count {
+      font-family: var(--ff-mono); font-size: 10.5px;
+      color: var(--text-3); letter-spacing: 0.06em;
+    }
+
+    .article-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 20px;
+    }
+    .card-featured { grid-column: span 7; }
+    .card-side     { grid-column: span 5; }
+    .card-third    { grid-column: span 4; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 32px;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+      transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .card:hover {
+      border-color: var(--border-2);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px var(--shadow);
+    }
+    .card-corner {
+      position: absolute; bottom: -1px; right: -1px;
+      opacity: 0.18; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .card:hover .card-corner { opacity: 0.32; }
+
+    .card-status {
+      font-family: var(--ff-mono); font-size: 9.5px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-draft    { background: oklch(70% 0.14 78); }
+    .dot-soon     { background: oklch(68% 0.12 175); }
+    .dot-published{ background: oklch(63% 0.14 145); }
+
+    .card-title {
+      font-family: var(--ff-serif);
+      font-size: 21px; font-weight: 600;
+      line-height: 1.22; letter-spacing: -0.015em;
+      color: var(--text); text-wrap: pretty;
+      margin-bottom: 12px;
+      flex-grow: 1;
+    }
+    .card-featured .card-title { font-size: 26px; }
+
+    .card-excerpt {
+      font-size: 13.5px; line-height: 1.72;
+      color: var(--text-2); text-wrap: pretty;
+      font-weight: 300; margin-bottom: 22px;
+    }
+    .card-footer {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .card-arrow {
+      font-size: 17px; color: var(--text-3);
+      transition: transform 0.2s, color 0.2s;
+      line-height: 1;
+    }
+    .card:hover .card-arrow {
+      transform: translateX(5px); color: var(--text);
+    }
+
+    /* ── FOOTER ──────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 52px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+    }
+    .footer-left {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .footer-text {
+      font-family: var(--ff-mono); font-size: 10.5px;
+      color: var(--text-3); letter-spacing: 0.04em;
+    }
+    .footer-links {
+      display: flex; gap: 20px;
+    }
+    .footer-link {
+      font-family: var(--ff-mono); font-size: 10.5px;
+      color: var(--text-3); text-decoration: none;
+      letter-spacing: 0.04em; transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--text); }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    .hero-mobile-photo {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-right .nav-link { display: none; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-content { padding: 52px 24px; }
+      .hero-visual { display: none; }
+      .hero-mobile-photo {
+        display: block;
+        width: 96px; height: 96px;
+        border-radius: 16px;
+        object-fit: cover; object-position: center top;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .hero-name-row {
+        display: flex; align-items: center; gap: 16px;
+        margin-bottom: 8px;
+      }
+      .hero-name-row .hero-name { margin-bottom: 0; }
+      .articles-wrap { padding: 40px 24px 60px; }
+      .card-featured, .card-side, .card-third { grid-column: span 12; }
+      footer { padding: 24px; flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+<meta id="push::2.25.8::ext-id" content="dljjddkmmcminffjbcmeccgfbjlhmhlm"></head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <!-- Isometric cube logo mark -->
+    <svg width="30" height="26" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+      <polygon id="logo-top" points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+      <polygon id="logo-left" points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+      <polygon id="logo-right" points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+    </svg>
+    <span class="nav-logo-text">Evan Baltman</span>
+  </a>
+  <div class="nav-right">
+    <a href="#writing" class="nav-link">Writing</a>
+    <a href="article.html" class="nav-link">About</a>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle theme">
+      <!-- Sun icon -->
+      <svg class="toggle-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="3"></circle>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"></path>
+      </svg>
+      <!-- Moon icon -->
+      <svg class="toggle-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M13.5 10A6 6 0 016 2.5a6 6 0 100 11 6 6 0 007.5-3.5z"></path>
+      </svg>
+      <span id="theme-label">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <p class="hero-eyebrow">Detection Engineering · Threat Hunting</p>
+      <div class="hero-name-row">
+        <h1 class="hero-name">Evan<br><em>Baltman</em></h1>
+        <img class="hero-mobile-photo" src="uploads/evan_schulay.png" alt="Evan Baltman">
+      </div>
+      <div class="hero-rule"></div>
+      <p class="hero-bio">
+        I'm a generalist passionate about finding <strong>patterns in the noise</strong>. Currently doing detection engineering at <strong>GitLab</strong> on the Signal Engineering Team, focused on detecting agentic AI-related threats — CVEs in tools like OpenAI's Codex and Anthropic's Claude Code.
+        Outside security, I love learning foreign languages <em>(я учу русский сейчас)</em> and music.
+      </p>
+      <div class="hero-tags">
+        <span class="tag">Detection Engineering</span>
+        <span class="tag">Agentic AI Threats</span>
+        <span class="tag">Threat Hunting</span>
+        <span class="tag">GitLab</span>
+        <span class="tag">Russian · Language Learning</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img class="hero-photo" src="uploads/evan_schulay.png" alt="Evan Baltman and his dog">
+    </div>
+  </div>
+</section>
+
+<!-- ── ARTICLES ───────────────────────────────── -->
+<main>
+  <div class="articles-wrap" id="writing">
+    <div class="section-header">
+      <h2 class="section-title">Writing</h2>
+      <span class="section-count">3 articles</span>
+    </div>
+
+    <div class="article-grid">
+
+      <!-- Featured / In-progress article -->
+      <a href="article.html" class="card card-featured">
+        <div class="card-status">
+          <span class="dot dot-draft"></span>
+          In Progress · Est. May 2025
+        </div>
+        <h3 class="card-title">Hunting the Ghost in the Machine: Detecting Malicious Exploitation of AI Coding Agents</h3>
+        <p class="card-excerpt">
+          Agentic AI tools like Claude Code and GitHub Copilot execute arbitrary code, read files, and make network requests on behalf of developers. When threat actors find CVEs in these agents, the attack surface expands dramatically. This piece explores detection strategies, MITRE ATT&amp;CK mappings, and YARA-based hunting rules for AI agent exploitation in enterprise environments.
+        </p>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">CVE Analysis</span>
+            <span class="tag">AI Agents</span>
+            <span class="tag">YARA</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </div>
+        <!-- Subtle corner cube decoration -->
+        <svg class="card-corner" width="72" height="62" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+          <polygon points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+          <polygon points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+          <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+        </svg>
+      </a>
+
+      <!-- Side card: coming soon -->
+      <div class="card card-side">
+        <div class="card-status">
+          <span class="dot dot-soon"></span>
+          Coming Soon
+        </div>
+        <h3 class="card-title">Prompt Injection at Scale: Threat Modeling AI-Augmented CI/CD Pipelines</h3>
+        <p class="card-excerpt">
+          When your CI pipeline can talk to an LLM, a crafted commit message might be enough to exfiltrate secrets. Threat modeling the new attack surface of AI-augmented build systems.
+        </p>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Prompt Injection</span>
+            <span class="tag">CI/CD</span>
+          </div>
+        </div>
+        <svg class="card-corner" width="72" height="62" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+          <polygon points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+          <polygon points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+          <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+        </svg>
+      </div>
+
+      <!-- Bottom row: two more coming soon -->
+      <div class="card card-third">
+        <div class="card-status">
+          <span class="dot dot-soon"></span>
+          Coming Soon
+        </div>
+        <h3 class="card-title">Detection as Code: Building a SIEM Rule Review Workflow with GitLab</h3>
+        <p class="card-excerpt">
+          Treating detections like software: version control, peer review, and automated testing for SIEM rules using GitLab's native CI tooling.
+        </p>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Detection as Code</span>
+            <span class="tag">SIEM</span>
+          </div>
+        </div>
+        <svg class="card-corner" width="72" height="62" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+          <polygon points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+          <polygon points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+          <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+        </svg>
+      </div>
+
+      <div class="card card-third">
+        <div class="card-status">
+          <span class="dot dot-soon"></span>
+          Coming Soon
+        </div>
+        <h3 class="card-title">Signal vs. Noise: Tuning Detections in High-Velocity Developer Environments</h3>
+        <p class="card-excerpt">
+          At GitLab, developers generate enormous amounts of log data. How do you build detections that catch real threats without burning out your team with false positives?
+        </p>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Signal Engineering</span>
+            <span class="tag">Alert Fatigue</span>
+          </div>
+        </div>
+        <svg class="card-corner" width="72" height="62" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+          <polygon points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+          <polygon points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+          <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+        </svg>
+      </div>
+
+      <div class="card card-third">
+        <div class="card-status">
+          <span class="dot dot-soon"></span>
+          Coming Soon
+        </div>
+        <h3 class="card-title">Learning Russian as an InfoSec Engineer: Notes on Pattern Recognition in Language and Logs</h3>
+        <p class="card-excerpt">
+          Finding patterns in security telemetry and finding patterns in a foreign language have more in common than you'd think. Reflections on learning Russian while working in detection engineering.
+        </p>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Language Learning</span>
+            <span class="tag">Meta</span>
+          </div>
+        </div>
+        <svg class="card-corner" width="72" height="62" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+          <polygon points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+          <polygon points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+          <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ── FOOTER ──────────────────────────────────── -->
+<footer>
+  <div class="footer-left">
+    <svg width="20" height="17" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+      <polygon points="30,2 58,17 30,32 2,17" fill="var(--cube-top)"></polygon>
+      <polygon points="2,17 30,32 30,50 2,35" fill="var(--cube-left)"></polygon>
+      <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"></polygon>
+    </svg>
+    <span class="footer-text">© 2025 Evan Baltman</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://gitlab.com" class="footer-link" target="_blank">GitLab</a>
+    <a href="https://linkedin.com" class="footer-link" target="_blank">LinkedIn</a>
+    <a href="#" class="footer-link">RSS</a>
+  </div>
+</footer>
+
+  <div class="tweak-row">
+    <span class="tweak-label">Theme</span>
+    <select class="tweak-select" id="tw-theme">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </div>
+  <div class="tweak-row">
+    <span class="tweak-label">Cube opacity</span>
+    <input type="range" min="10" max="100" value="50" id="tw-cube-opacity" style="width:100px">
+  </div>
+  <div class="tweak-row">
+    <span class="tweak-label">Font size</span>
+    <select class="tweak-select" id="tw-font">
+      <option value="14">Small</option>
+      <option value="15" selected="">Default</option>
+      <option value="17">Large</option>
+    </select>
+  </div>
+</div>
+
+<script>
+  // ── Theme toggle ─────────────────────────────
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('theme-btn');
+  const themeLabel = document.getElementById('theme-label');
+
+  const saved = localStorage.getItem('eb-theme') || 'light';
+  setTheme(saved);
+
+  themeBtn.addEventListener('click', () => {
+    setTheme(html.dataset.theme === 'light' ? 'dark' : 'light');
+  });
+
+  function setTheme(t) {
+    html.dataset.theme = t;
+    themeLabel.textContent = t === 'light' ? 'Dark' : 'Light';
+    localStorage.setItem('eb-theme', t);
+    renderCubes();
+  }
+
+  // ── Isometric cube grid ───────────────────────
+  function renderCubes() {
+    const svg = document.getElementById('cube-canvas');
+    if (!svg) return;
+    svg.innerHTML = '';
+
+    const W = svg.parentElement.offsetWidth || 360;
+    const H = svg.parentElement.offsetHeight || 420;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+    const isDark = html.dataset.theme === 'dark';
+    const a = 22; // half-height of cube
+    const cw = a * Math.sqrt(3); // ≈ 38px, cube width
+    const rowStep = a * 1.5;     // ≈ 33px, row vertical step
+    const colOffset = cw / 2;
+
+    // Compute colors from CSS vars
+    const style = getComputedStyle(html);
+    const topC   = style.getPropertyValue('--cube-top').trim();
+    const leftC  = style.getPropertyValue('--cube-left').trim();
+    const rightC = style.getPropertyValue('--cube-right').trim();
+
+    const opa = 0.5;
+
+    // Extra rows/cols so the grid bleeds past edges
+    const cols = Math.ceil(W / cw) + 2;
+    const rows = Math.ceil(H / rowStep) + 2;
+
+    const frag = document.createDocumentFragment();
+
+    for (let r = -1; r < rows; r++) {
+      for (let c = -1; c < cols; c++) {
+        const cx = c * cw + (r % 2 === 0 ? 0 : colOffset) - colOffset / 2;
+        const cy = r * rowStep - a + rowStep;
+
+        // 7 key points
+        const s3 = Math.sqrt(3) / 2;
+        const v1 = [cx,       cy - a];
+        const v2 = [cx + a*s3, cy - a/2];
+        const v3 = [cx + a*s3, cy + a/2];
+        const v4 = [cx,       cy + a];
+        const v5 = [cx - a*s3, cy + a/2];
+        const v6 = [cx - a*s3, cy - a/2];
+        const fc = [cx, cy];
+
+        const mkPoly = (pts, fill) => {
+          const el = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          el.setAttribute('points', pts.map(p => p.join(',')).join(' '));
+          el.setAttribute('fill', fill);
+          el.setAttribute('opacity', opa);
+          return el;
+        };
+
+        frag.appendChild(mkPoly([v1, v2, fc, v6], topC));
+        frag.appendChild(mkPoly([v2, v3, v4, fc], rightC));
+        frag.appendChild(mkPoly([v6, fc, v4, v5], leftC));
+      }
+    }
+    svg.appendChild(frag);
+  }
+
+  // Render after fonts/layout settle
+  window.addEventListener('load', renderCubes);
+  window.addEventListener('resize', renderCubes);
+  setTimeout(renderCubes, 100);
+
+</script>
+
+
+
+</body></html>

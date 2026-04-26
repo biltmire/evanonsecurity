@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hunting the Ghost in the Machine — Evan Baltman</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         oklch(96.8% 0.011 78);
+      --bg-alt:     oklch(93.5% 0.013 76);
+      --surface:    oklch(99.2% 0.006 78);
+      --border:     oklch(87%   0.013 75);
+      --border-2:   oklch(80%   0.014 74);
+      --text:       oklch(18%   0.016 64);
+      --text-2:     oklch(46%   0.013 64);
+      --text-3:     oklch(64%   0.010 68);
+      --accent:     oklch(36%   0.022 64);
+      --tag-bg:     oklch(90%   0.015 75);
+      --tag-text:   oklch(34%   0.020 64);
+      --code-bg:    oklch(91%   0.014 76);
+      --cube-top:   oklch(88%   0.018 76);
+      --cube-left:  oklch(74%   0.018 74);
+      --cube-right: oklch(60%   0.018 72);
+      --shadow:     oklch(0% 0 0 / 0.06);
+      --ff-serif:   'Playfair Display', Georgia, serif;
+      --ff-sans:    'Inter', system-ui, sans-serif;
+      --ff-mono:    'JetBrains Mono', 'Fira Code', monospace;
+    }
+    [data-theme="dark"] {
+      --bg:         oklch(12.5% 0.010 268);
+      --bg-alt:     oklch(17%   0.012 265);
+      --surface:    oklch(15.5% 0.010 266);
+      --border:     oklch(26%   0.013 265);
+      --border-2:   oklch(33%   0.014 265);
+      --text:       oklch(91%   0.010 76);
+      --text-2:     oklch(65%   0.012 75);
+      --text-3:     oklch(48%   0.010 74);
+      --accent:     oklch(82%   0.022 76);
+      --tag-bg:     oklch(22%   0.015 265);
+      --tag-text:   oklch(74%   0.020 76);
+      --code-bg:    oklch(19%   0.012 265);
+      --cube-top:   oklch(32%   0.014 265);
+      --cube-left:  oklch(22%   0.014 266);
+      --cube-right: oklch(17%   0.013 267);
+      --shadow:     oklch(0% 0 0 / 0.40);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--ff-sans);
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 15px;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    /* ── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 52px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      transition: background 0.35s;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo-text {
+      font-family: var(--ff-serif); font-size: 16px;
+      font-weight: 600; letter-spacing: -0.01em;
+    }
+    .nav-right { display: flex; align-items: center; gap: 36px; }
+    .nav-link {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-2); text-decoration: none; transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--text); }
+    .theme-toggle {
+      background: none; border: 1px solid var(--border);
+      border-radius: 100px; padding: 5px 13px;
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      font-family: var(--ff-mono); font-size: 10.5px;
+      color: var(--text-2); transition: all 0.2s;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--border-2); }
+    [data-theme="dark"]  .toggle-sun  { display: none; }
+    [data-theme="light"] .toggle-moon { display: none; }
+
+    /* ── ARTICLE HEADER ──────────────────────── */
+    .article-header {
+      max-width: 760px; margin: 0 auto;
+      padding: 64px 40px 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--ff-mono); font-size: 10.5px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-3); text-decoration: none;
+      margin-bottom: 36px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+    .back-link svg { transition: transform 0.2s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+
+    .article-status {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--ff-mono); font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 20px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .dot-draft { background: oklch(70% 0.14 78); }
+
+    .article-title {
+      font-family: var(--ff-serif);
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -0.022em;
+      color: var(--text); text-wrap: pretty;
+      margin-bottom: 28px;
+    }
+    .article-title em { font-style: italic; font-weight: 400; }
+
+    .article-meta {
+      display: flex; flex-wrap: wrap;
+      align-items: center; gap: 6px 18px;
+      margin-bottom: 22px;
+    }
+    .meta-item {
+      font-family: var(--ff-mono); font-size: 11px;
+      color: var(--text-3); letter-spacing: 0.04em;
+    }
+    .meta-sep { color: var(--border-2); font-size: 12px; }
+    .meta-author { color: var(--text-2); font-weight: 500; }
+
+    .article-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag {
+      font-family: var(--ff-mono); font-size: 10px;
+      padding: 5px 10px; background: var(--tag-bg);
+      color: var(--tag-text); border-radius: 2px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── ARTICLE BODY ────────────────────────── */
+    .article-body {
+      max-width: 760px; margin: 0 auto;
+      padding: 52px 40px 80px;
+    }
+
+    /* Reading progress bar */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px;
+      background: var(--accent); width: 0%;
+      z-index: 200; transition: width 0.1s linear;
+    }
+
+    /* Typography */
+    .article-body p {
+      font-size: 16.5px; line-height: 1.82;
+      color: var(--text-2); margin-bottom: 26px;
+      font-weight: 300; text-wrap: pretty;
+    }
+    .article-body > p:first-child {
+      font-size: 18px; color: var(--text);
+      font-weight: 400; line-height: 1.7;
+    }
+    .article-body h2 {
+      font-family: var(--ff-serif);
+      font-size: 26px; font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--text); margin: 52px 0 18px;
+      line-height: 1.2;
+    }
+    .article-body h3 {
+      font-family: var(--ff-serif);
+      font-size: 19px; font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text); margin: 36px 0 12px;
+    }
+    .article-body strong { color: var(--text); font-weight: 600; }
+    .article-body em { font-style: italic; }
+    .article-body a {
+      color: var(--text); border-bottom: 1px solid var(--border-2);
+      text-decoration: none; transition: border-color 0.2s;
+    }
+    .article-body a:hover { border-color: var(--text); }
+
+    /* Pull quote */
+    .pull-quote {
+      margin: 44px 0; padding: 28px 36px;
+      border-left: 3px solid var(--border-2);
+      background: var(--bg-alt);
+    }
+    .pull-quote p {
+      font-family: var(--ff-serif);
+      font-size: 19px !important; line-height: 1.55 !important;
+      font-style: italic; color: var(--text) !important;
+      font-weight: 400 !important; margin-bottom: 0 !important;
+    }
+
+    /* Code blocks */
+    .code-block {
+      margin: 32px 0;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-alt);
+    }
+    .code-lang {
+      font-family: var(--ff-mono); font-size: 10px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .code-title {
+      font-family: var(--ff-mono); font-size: 10.5px;
+      color: var(--text-2);
+    }
+    .code-block pre {
+      padding: 20px 18px; overflow-x: auto;
+      font-family: var(--ff-mono); font-size: 12.5px;
+      line-height: 1.7; color: var(--text-2);
+      margin: 0;
+    }
+    .code-block pre .kw  { color: oklch(55% 0.15 280); }
+    .code-block pre .str { color: oklch(52% 0.16 148); }
+    .code-block pre .cm  { color: var(--text-3); font-style: italic; }
+    .code-block pre .nm  { color: oklch(52% 0.14 42); }
+    [data-theme="dark"] .code-block pre .kw  { color: oklch(75% 0.12 265); }
+    [data-theme="dark"] .code-block pre .str { color: oklch(74% 0.14 148); }
+    [data-theme="dark"] .code-block pre .nm  { color: oklch(76% 0.12 75); }
+
+    /* Callout boxes */
+    .callout {
+      margin: 32px 0; padding: 20px 24px;
+      border-radius: 3px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .callout-note {
+      background: oklch(95% 0.018 238 / 0.4);
+      border: 1px solid oklch(80% 0.04 238);
+    }
+    [data-theme="dark"] .callout-note {
+      background: oklch(22% 0.015 265 / 0.6);
+      border-color: oklch(35% 0.02 265);
+    }
+    .callout-warn {
+      background: oklch(97% 0.025 78 / 0.6);
+      border: 1px solid oklch(82% 0.04 75);
+    }
+    [data-theme="dark"] .callout-warn {
+      background: oklch(20% 0.018 60 / 0.5);
+      border-color: oklch(35% 0.025 70);
+    }
+    .callout-icon {
+      font-size: 14px; flex-shrink: 0; margin-top: 1px;
+    }
+    .callout p {
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      margin-bottom: 0 !important;
+      color: var(--text-2) !important;
+      font-weight: 400 !important;
+    }
+    .callout strong { color: var(--text) !important; }
+
+    /* ATT&CK table */
+    .attack-table {
+      width: 100%; border-collapse: collapse;
+      margin: 28px 0; font-size: 13px;
+    }
+    .attack-table th {
+      font-family: var(--ff-mono); font-size: 9.5px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); text-align: left;
+      padding: 8px 14px; border-bottom: 2px solid var(--border);
+    }
+    .attack-table td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      color: var(--text-2); line-height: 1.5;
+    }
+    .attack-table tr:hover td { background: var(--bg-alt); }
+    .attack-id {
+      font-family: var(--ff-mono); font-size: 11px;
+      color: var(--text-3);
+    }
+
+    /* Draft watermark section */
+    .draft-notice {
+      margin: 48px 0; padding: 24px 28px;
+      border: 1px dashed var(--border-2);
+      border-radius: 3px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .draft-notice-icon {
+      font-family: var(--ff-mono); font-size: 9px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: oklch(70% 0.14 78); padding: 3px 7px;
+      border: 1px solid oklch(70% 0.14 78);
+      border-radius: 2px; flex-shrink: 0; margin-top: 2px;
+    }
+    .draft-notice p {
+      font-size: 13.5px !important; margin-bottom: 0 !important;
+      color: var(--text-3) !important; font-style: italic;
+      font-weight: 400 !important; line-height: 1.6 !important;
+    }
+
+    /* Escher divider */
+    .escher-divider {
+      display: flex; align-items: center; gap: 16px;
+      margin: 48px 0;
+    }
+    .escher-divider::before, .escher-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .escher-divider-cubes {
+      display: flex; gap: 3px; opacity: 0.4;
+    }
+
+    /* ── FOOTER ──────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border); padding: 28px 52px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-left { display: flex; align-items: center; gap: 10px; }
+    .footer-text { font-family: var(--ff-mono); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.04em; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-link { font-family: var(--ff-mono); font-size: 10.5px; color: var(--text-3); text-decoration: none; letter-spacing: 0.04em; transition: color 0.2s; }
+    .footer-link:hover { color: var(--text); }
+
+    @media (max-width: 800px) {
+      nav { padding: 16px 20px; }
+      .nav-right .nav-link { display: none; }
+      .article-header, .article-body { padding-left: 20px; padding-right: 20px; }
+      footer { padding: 24px 20px; flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- ── NAV ───────────────────────────────────── -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg width="30" height="26" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+      <polygon points="30,2 58,17 30,32 2,17"  fill="var(--cube-top)"/>
+      <polygon points="2,17 30,32 30,50 2,35"  fill="var(--cube-left)"/>
+      <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"/>
+    </svg>
+    <span class="nav-logo-text">Evan Baltman</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html#writing" class="nav-link">Writing</a>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle theme">
+      <svg class="toggle-sun" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="3"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
+      </svg>
+      <svg class="toggle-moon" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M13.5 10A6 6 0 016 2.5a6 6 0 100 11 6 6 0 007.5-3.5z"/>
+      </svg>
+      <span id="theme-label">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── ARTICLE HEADER ─────────────────────────── -->
+<header class="article-header">
+  <a href="index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M10 3L5 8l5 5"/>
+    </svg>
+    All writing
+  </a>
+
+  <div class="article-status">
+    <span class="dot dot-draft"></span>
+    Draft — Work in Progress
+  </div>
+
+  <h1 class="article-title">
+    Hunting the Ghost in the Machine:<br>
+    <em>Detecting Malicious Exploitation of AI Coding Agents</em>
+  </h1>
+
+  <div class="article-meta">
+    <span class="meta-item meta-author">Evan Baltman</span>
+    <span class="meta-sep">·</span>
+    <span class="meta-item">April 2025</span>
+    <span class="meta-sep">·</span>
+    <span class="meta-item">~12 min read</span>
+    <span class="meta-sep">·</span>
+    <span class="meta-item">GitLab Signal Engineering</span>
+  </div>
+
+  <div class="article-tags">
+    <span class="tag">CVE Analysis</span>
+    <span class="tag">AI Agents</span>
+    <span class="tag">YARA</span>
+    <span class="tag">Detection Engineering</span>
+    <span class="tag">Threat Hunting</span>
+  </div>
+</header>
+
+<!-- ── ARTICLE BODY ───────────────────────────── -->
+<article class="article-body">
+
+  <p>
+    The average developer's machine is now home to at least one agentic AI tool — something that reads their codebase, writes files, executes shell commands, and makes network calls on their behalf. Claude Code, GitHub Copilot (in agent mode), and similar tools have fundamentally changed what it means to run software on a developer's workstation. And where there's code execution, there's an attack surface.
+  </p>
+
+  <p>
+    As a detection engineer, I'm less interested in whether AI agents hallucinate and more interested in what happens when someone discovers a vulnerability in the agent itself. What does malicious exploitation of an AI coding assistant look like in telemetry? How do you hunt for it? And what detection logic actually works at scale?
+  </p>
+
+  <div class="callout callout-note">
+    <span class="callout-icon">🔍</span>
+    <p><strong>Scope:</strong> This piece focuses on host-level and process-level detection for AI agent exploitation. It assumes you have access to endpoint telemetry (e.g., via osquery, Elastic Agent, or similar) and some form of SIEM. Cloud-side detections (e.g., for API key abuse) are a separate topic.</p>
+  </div>
+
+  <h2>The New Attack Surface</h2>
+
+  <p>
+    AI coding agents are architecturally interesting from a security perspective because they combine several high-risk primitives: <strong>arbitrary code execution</strong>, <strong>filesystem read/write</strong>, <strong>subprocess spawning</strong>, and <strong>outbound network access</strong>. These aren't new threat vectors — developers have always had these capabilities. What's new is that an LLM is now mediating these actions, and that LLM can be influenced.
+  </p>
+
+  <p>
+    The threat model breaks down into two broad categories. First, there are <strong>vulnerabilities in the agent itself</strong> — memory corruption bugs, authentication bypasses, path traversal in file-handling code, or prompt injection via crafted inputs. Second, there is <strong>misuse of the agent's legitimate capabilities</strong> — convincing it (or its user) to execute malicious code via social engineering, malicious repositories, or poisoned context.
+  </p>
+
+  <div class="pull-quote">
+    <p>"When a CVE lands in a tool that has a shell open and your SSH keys in scope, it's not just a software bug — it's a potential initial access vector."</p>
+  </div>
+
+  <p>
+    The CVEs we've seen in this space so far are mostly in the dependency chains and API handling layers. But as these agents become more capable and more embedded in developer workflows, the vulnerability surface will grow. The good news: the <em>behavioral signatures</em> of exploitation tend to be consistent, regardless of the specific CVE.
+  </p>
+
+  <h2>What Exploitation Looks Like in Telemetry</h2>
+
+  <p>
+    When an AI agent is exploited, the attacker's goal is usually one of three things: credential theft, persistent access, or lateral movement to cloud infrastructure. Let's look at what each of those looks like at the telemetry layer.
+  </p>
+
+  <h3>Process Lineage Anomalies</h3>
+
+  <p>
+    The most reliable signal is unexpected process spawning. Under normal operation, an AI agent like Claude Code will spawn processes with predictable parents and arguments — compilers, test runners, git operations. What stands out is when the agent spawns processes that have no relationship to normal development activity.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">YARA</span>
+      <span class="code-title">ai_agent_suspicious_spawn.yar</span>
+    </div>
+    <pre><span class="cm">// Detect suspicious process spawning from known AI agent parent processes</span>
+<span class="kw">rule</span> <span class="nm">AIAgent_SuspiciousChildProcess</span> {
+  <span class="kw">meta:</span>
+    description = <span class="str">"Flags unexpected child processes spawned by AI coding agents"</span>
+    author      = <span class="str">"Evan Baltman @ GitLab Signal Engineering"</span>
+    date        = <span class="str">"2025-04"</span>
+    mitre       = <span class="str">"T1059.004, T1106"</span>
+
+  <span class="kw">strings:</span>
+    <span class="cm">// Parent process names for common AI coding agents</span>
+    $parent_claude  = <span class="str">"claude"</span>      <span class="kw">ascii</span> <span class="kw">wide</span>
+    $parent_copilot = <span class="str">"copilot"</span>     <span class="kw">ascii</span> <span class="kw">wide</span>
+    $parent_cursor  = <span class="str">"cursor"</span>      <span class="kw">ascii</span> <span class="kw">wide</span>
+
+    <span class="cm">// Suspicious child process indicators</span>
+    $child_curl  = <span class="str">"curl"</span>      <span class="kw">ascii</span>
+    $child_wget  = <span class="str">"wget"</span>      <span class="kw">ascii</span>
+    $child_nc    = <span class="str">" nc "</span>      <span class="kw">ascii</span>
+    $child_bash  = <span class="str">"/bin/bash"</span> <span class="kw">ascii</span>
+    $child_sh_c  = <span class="str">"sh -c"</span>    <span class="kw">ascii</span>
+
+  <span class="kw">condition:</span>
+    <span class="kw">any of</span> ($parent_*) <span class="kw">and</span> <span class="kw">any of</span> ($child_*)
+}</pre>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠</span>
+    <p><strong>Tuning note:</strong> Claude Code legitimately spawns shells to execute code. The signal here isn't the child process alone — it's the combination of parent context, network access, and the specific arguments passed. Enrich with <code style="font-family:var(--ff-mono);font-size:12px;">process.args</code> data before alerting.</p>
+  </div>
+
+  <h3>Credential Access Patterns</h3>
+
+  <p>
+    A compromised agent operating in a developer's home directory has access to <code style="font-family:var(--ff-mono);font-size:13px;">~/.ssh/</code>, <code style="font-family:var(--ff-mono);font-size:13px;">~/.aws/credentials</code>, <code style="font-family:var(--ff-mono);font-size:13px;">~/.config/gcloud/</code>, and similar paths. File access to these locations — especially reads followed immediately by outbound network connections — is a high-fidelity indicator.
+  </p>
+
+  <p>
+    In osquery, you can hunt for this with a simple join across <code style="font-family:var(--ff-mono);font-size:13px;">file_events</code> and <code style="font-family:var(--ff-mono);font-size:13px;">socket_events</code>:
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">SQL</span>
+      <span class="code-title">osquery — credential file + network correlation</span>
+    </div>
+    <pre><span class="kw">SELECT</span>
+  fe.target_path,
+  fe.action,
+  fe.pid,
+  p.name <span class="kw">AS</span> process_name,
+  p.cmdline,
+  se.remote_address,
+  se.remote_port,
+  se.time <span class="kw">AS</span> socket_time
+<span class="kw">FROM</span> file_events fe
+<span class="kw">JOIN</span> processes p <span class="kw">ON</span> fe.pid = p.pid
+<span class="kw">JOIN</span> socket_events se <span class="kw">ON</span> se.pid = fe.pid
+  <span class="kw">AND</span> se.time BETWEEN fe.time <span class="kw">AND</span> fe.time + <span class="nm">30</span>
+<span class="kw">WHERE</span>
+  fe.target_path <span class="kw">LIKE</span> <span class="str">'%/.ssh/%'</span>
+  <span class="kw">OR</span> fe.target_path <span class="kw">LIKE</span> <span class="str">'%/.aws/credentials'</span>
+  <span class="kw">OR</span> fe.target_path <span class="kw">LIKE</span> <span class="str">'%/.config/gcloud/%'</span>
+<span class="kw">ORDER BY</span> fe.time <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <h2>MITRE ATT&CK Mapping</h2>
+
+  <p>
+    Mapping AI agent exploitation to the ATT&CK framework helps communicate risk to stakeholders and align detections with existing playbooks. Here's how the most common exploitation patterns map:
+  </p>
+
+  <table class="attack-table">
+    <thead>
+      <tr>
+        <th>Technique ID</th>
+        <th>Technique Name</th>
+        <th>AI Agent Context</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="attack-id">T1059.004</td>
+        <td>Unix Shell</td>
+        <td>Agent spawns shell to execute attacker-controlled commands</td>
+      </tr>
+      <tr>
+        <td class="attack-id">T1552.001</td>
+        <td>Credentials in Files</td>
+        <td>Agent reads ~/.aws/credentials, ~/.ssh/id_rsa, etc.</td>
+      </tr>
+      <tr>
+        <td class="attack-id">T1106</td>
+        <td>Native API</td>
+        <td>Agent uses OS APIs to spawn processes or read memory</td>
+      </tr>
+      <tr>
+        <td class="attack-id">T1071.001</td>
+        <td>Web Protocols</td>
+        <td>Exfiltration over HTTP/HTTPS from agent process</td>
+      </tr>
+      <tr>
+        <td class="attack-id">T1566.001</td>
+        <td>Spearphishing Attachment</td>
+        <td>Malicious repo or file causes agent to execute payload</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Escher divider -->
+  <div class="escher-divider">
+    <div class="escher-divider-cubes">
+      <svg width="18" height="16" viewBox="0 0 60 52" fill="none">
+        <polygon points="30,2 58,17 30,32 2,17"  fill="var(--cube-top)"/>
+        <polygon points="2,17 30,32 30,50 2,35"  fill="var(--cube-left)"/>
+        <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"/>
+      </svg>
+      <svg width="18" height="16" viewBox="0 0 60 52" fill="none">
+        <polygon points="30,2 58,17 30,32 2,17"  fill="var(--cube-top)"/>
+        <polygon points="2,17 30,32 30,50 2,35"  fill="var(--cube-left)"/>
+        <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"/>
+      </svg>
+      <svg width="18" height="16" viewBox="0 0 60 52" fill="none">
+        <polygon points="30,2 58,17 30,32 2,17"  fill="var(--cube-top)"/>
+        <polygon points="2,17 30,32 30,50 2,35"  fill="var(--cube-left)"/>
+        <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"/>
+      </svg>
+    </div>
+  </div>
+
+  <h2>Thinking in Layers, Not Rules</h2>
+
+  <p>
+    The mistake I see most often in detection engineering is building single-signal detections. One YARA rule. One Sigma rule. One alert. The problem is that any sufficiently motivated attacker will evade a single signal. What they struggle to evade is a <em>layered</em> detection model where each layer asks a different question.
+  </p>
+
+  <p>
+    For AI agent exploitation specifically, I think about three detection layers: <strong>behavioral</strong> (what is the process doing?), <strong>structural</strong> (where does this process live in the system?), and <strong>temporal</strong> (does the timing of events make sense?). A good detection combines signals from at least two of these layers before firing.
+  </p>
+
+  <p>
+    This is, in a way, the same mental model I use when learning a language. You don't understand a sentence by knowing what each word means in isolation — you understand it by seeing how the words relate to each other, in context, over time. Detection is the same. The signal is in the relationships, not the atoms.
+  </p>
+
+  <div class="draft-notice">
+    <span class="draft-notice-icon">Draft</span>
+    <p>
+      The next sections — covering behavioral baselining, cloud-side detections, and a full case study of a real AI agent CVE — are still being written. Check back in May 2025. Feel free to reach out on LinkedIn if you want to discuss in the meantime.
+    </p>
+  </div>
+
+</article>
+
+<!-- ── FOOTER ──────────────────────────────────── -->
+<footer>
+  <div class="footer-left">
+    <svg width="20" height="17" viewBox="0 0 60 52" fill="none" aria-hidden="true">
+      <polygon points="30,2 58,17 30,32 2,17"  fill="var(--cube-top)"/>
+      <polygon points="2,17 30,32 30,50 2,35"  fill="var(--cube-left)"/>
+      <polygon points="58,17 30,32 30,50 58,35" fill="var(--cube-right)"/>
+    </svg>
+    <span class="footer-text">© 2025 Evan Baltman</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://gitlab.com" class="footer-link" target="_blank">GitLab</a>
+    <a href="https://linkedin.com" class="footer-link" target="_blank">LinkedIn</a>
+    <a href="index.html" class="footer-link">← Home</a>
+  </div>
+</footer>
+
+<script>
+  // Theme
+  const html = document.documentElement;
+  const btn  = document.getElementById('theme-btn');
+  const lbl  = document.getElementById('theme-label');
+  const saved = localStorage.getItem('eb-theme') || 'light';
+  setTheme(saved);
+  btn.addEventListener('click', () => setTheme(html.dataset.theme === 'light' ? 'dark' : 'light'));
+  function setTheme(t) {
+    html.dataset.theme = t;
+    lbl.textContent = t === 'light' ? 'Dark' : 'Light';
+    localStorage.setItem('eb-theme', t);
+  }
+
+  // Reading progress bar
+  window.addEventListener('scroll', () => {
+    const doc  = document.documentElement;
+    const body = document.body;
+    const total = Math.max(doc.scrollHeight, body.scrollHeight) - window.innerHeight;
+    const pct   = total > 0 ? (window.scrollY / total) * 100 : 0;
+    document.getElementById('progress-bar').style.width = pct + '%';
+  });
+</script>
+</body>
+</html>
