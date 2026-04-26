@@ -295,14 +295,14 @@
       .hero-visual { display: none; }
       .hero-mobile-photo {
         display: block;
-        width: 96px; height: 96px;
-        border-radius: 16px;
+        width: 128px; height: 128px;
+        border-radius: 20px;
         object-fit: cover; object-position: center top;
         border: 1px solid var(--border);
         flex-shrink: 0;
       }
       .hero-name-row {
-        display: flex; align-items: center; gap: 16px;
+        display: flex; align-items: center; gap: 20px;
         margin-bottom: 8px;
       }
       .hero-name-row .hero-name { margin-bottom: 0; }
@@ -516,27 +516,6 @@
     <a href="#" class="footer-link">RSS</a>
   </div>
 </footer>
-
-  <div class="tweak-row">
-    <span class="tweak-label">Theme</span>
-    <select class="tweak-select" id="tw-theme">
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-    </select>
-  </div>
-  <div class="tweak-row">
-    <span class="tweak-label">Cube opacity</span>
-    <input type="range" min="10" max="100" value="50" id="tw-cube-opacity" style="width:100px">
-  </div>
-  <div class="tweak-row">
-    <span class="tweak-label">Font size</span>
-    <select class="tweak-select" id="tw-font">
-      <option value="14">Small</option>
-      <option value="15" selected="">Default</option>
-      <option value="17">Large</option>
-    </select>
-  </div>
-</div>
 
 <script>
   // ── Theme toggle ─────────────────────────────
